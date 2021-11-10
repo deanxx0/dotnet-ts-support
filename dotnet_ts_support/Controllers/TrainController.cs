@@ -44,7 +44,6 @@ namespace dotnet_ts_support.Controllers
             _directoryService.Create(directory);
             var trainSetting = buildTrainSetting(startTrainModel);
             _trainSettingService.Create(trainSetting);
-            // trainserver post
             var trainServerInfo = _trainServerInfoService.Get(startTrainModel.serverIndex);
             var trainRequestModel = buildTrainRequestModel(startTrainModel);
             var responseTrain = _trainSerivce.PostTrainToServer(trainServerInfo.uri, trainRequestModel).Result;
@@ -58,6 +57,13 @@ namespace dotnet_ts_support.Controllers
             _trainSerivce.Create(train);
             return train;
         }
+
+        //[HttpGet("trainInfo/{id}"]
+        //public ActionResult<TrainInfoModel> GetTrainInfo(string id)
+        //{
+        //    var trainInfo = buildTrainInfoModel(Train train, string trainStatus, MetricModel metricModel);
+        //    return trainInfo;
+        //}
 
         [HttpGet("directory/{trainId}")]
         public ActionResult<Directory> GetDirectory(string trainId)
@@ -196,25 +202,25 @@ namespace dotnet_ts_support.Controllers
                     },
                     augmentation = new Augmentation()
                     {
-                        mirror = startTrainModel.mirror,
-                        flip = startTrainModel.flip,
-                        rotation90 = startTrainModel.rotation90,
-                        zoom = startTrainModel.zoom,
-                        tilt = startTrainModel.tilt,
-                        shift = startTrainModel.shift,
-                        rotation = startTrainModel.rotation,
-                        contrast = startTrainModel.contrast,
-                        brightness = startTrainModel.brightness,
-                        smoothFiltering = startTrainModel.smoothFiltering,
-                        noise = startTrainModel.noise,
-                        colorNoise = startTrainModel.colorNoise,
-                        partialFocus = startTrainModel.partialFocus,
-                        shade = startTrainModel.shade,
-                        hue = startTrainModel.hue,
-                        saturation = startTrainModel.saturation,
-                        maxRandomAugmentCount = startTrainModel.maxRandomAugmentCount,
-                        probability = startTrainModel.probability,
-                        borderMode = startTrainModel.borderMode,
+                        Mirror = startTrainModel.mirror,
+                        Flip = startTrainModel.flip,
+                        Rotation90 = startTrainModel.rotation90,
+                        Zoom = startTrainModel.zoom,
+                        Tilt = startTrainModel.tilt,
+                        Shift = startTrainModel.shift,
+                        Rotation = startTrainModel.rotation,
+                        Contrast = startTrainModel.contrast,
+                        Brightness = startTrainModel.brightness,
+                        SmoothFiltering = startTrainModel.smoothFiltering,
+                        Noise = startTrainModel.noise,
+                        ColorNoise = startTrainModel.colorNoise,
+                        PartialFocus = startTrainModel.partialFocus,
+                        Shade = startTrainModel.shade,
+                        Hue = startTrainModel.hue,
+                        Saturation = startTrainModel.saturation,
+                        MaxRandomAugmentCount = startTrainModel.maxRandomAugmentCount,
+                        Probability = startTrainModel.probability,
+                        BorderMode = startTrainModel.borderMode,
                     }
                 },
                 class_list = new System.Collections.Generic.Dictionary<string, string>()
@@ -226,6 +232,12 @@ namespace dotnet_ts_support.Controllers
             };
         }
 
+        //private TrainInfoModel buildTrainInfoModel(Train train, string trainStatus, MetricModel metricModel)
+        //{
+        //    return new TrainInfoModel()
+        //    {
 
+        //    }
+        //}
     }
 }

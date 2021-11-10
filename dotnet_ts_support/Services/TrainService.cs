@@ -21,7 +21,6 @@ namespace dotnet_ts_support.Services
             var client = new MongoClient(settings.ConnectionString);
             var db = client.GetDatabase(settings.DBName);
             _trains = db.GetCollection<Train>("trains");
-
             _httpClient = new HttpClient();
         }
 
@@ -39,7 +38,6 @@ namespace dotnet_ts_support.Services
 
         public void Remove(string id) => _trains.DeleteOne(train => train.id == id);
 
-        // return model?
         public async Task<TrainResponseModel> PostTrainToServer(string trainServerUri, TrainRequestModel trainRequestModel)
         {
             try
@@ -64,7 +62,6 @@ namespace dotnet_ts_support.Services
                 Console.WriteLine($"error! {e.Message}");
                 return null;
             }
-
             return null;
             //using (var response = await _httpClient.PostAsJsonAsync($"http://{trainServerUri}/trains", trainRequestModel))
             //{
@@ -94,5 +91,20 @@ namespace dotnet_ts_support.Services
             //    }
             //}
         }
+
+        //public async Task<> GetTrainStatusFromServer()
+        //{
+
+        //}
+
+        //public async Task<> GetTrainMetricFromServer()
+        //{
+
+        //}
+
+        //public async Task<> GetResourceFromServer()
+        //{
+
+        //}
     }
 }
