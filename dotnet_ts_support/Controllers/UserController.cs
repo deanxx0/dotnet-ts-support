@@ -65,6 +65,7 @@ namespace dotnet_ts_support.Controllers
             return user;
         }
 
+        [AllowAnonymous]
         [HttpPost]
         public ActionResult<User> Create(User user)
         {

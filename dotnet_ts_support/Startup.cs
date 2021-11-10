@@ -63,6 +63,10 @@ namespace dotnet_ts_support
             services.AddSingleton<IDBSettings>(sp => sp.GetRequiredService<IOptions<DBSettings>>().Value);
 
             services.AddSingleton<UserService>();
+            services.AddSingleton<DirectoryService>();
+            services.AddSingleton<TrainSettingService>();
+            services.AddSingleton<TrainService>();
+            services.AddSingleton<TrainServerInfoService>();
 
             services.AddControllers();
             services.AddSwaggerGen(c =>
