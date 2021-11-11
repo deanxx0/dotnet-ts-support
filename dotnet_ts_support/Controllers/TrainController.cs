@@ -83,22 +83,6 @@ namespace dotnet_ts_support.Controllers
             //return trainInfos.ToArray();
             return new ApiResponseModel(true, trainInfos.ToArray());
         }
-
-        [HttpGet("train/{id}")]
-        public ActionResult<ApiResponseModel> GetTrainInfo(string id)
-        {
-            var train = _trainSerivce.Get(id);
-            if (train == null) return NotFound();
-            var trainServerInfo = _trainServerInfoService.Get(train.serverIndex);
-            if (trainServerInfo == null) return NotFound();
-            var trainStatus = _trainSerivce.GetStatusFromServer(trainServerInfo.uri, train.serverTrainId).Result;
-            if (trainStatus == null) return NotFound();
-            var trainMetric = _trainSerivce.GetMetricFromServer(trainServerInfo.uri, train.serverTrainId).Result;
-            if (trainMetric == null) return NotFound();
-            var trainInfo = buildTrainInfoModel(train, trainStatus, trainMetric);
-            //return trainInfo;
-            return new ApiResponseModel(true, trainInfo);
-        }
         
         [HttpGet("directory/{trainId}")]
         public ActionResult<ApiResponseModel> GetDirectory(string trainId)
@@ -118,8 +102,8 @@ namespace dotnet_ts_support.Controllers
             if (train == null) return NotFound();
             var trainSetting = _trainSettingService.Get(train.trainSettingId);
             if (trainSetting == null) return NotFound();
-            //return trainSetting;
-            return new ApiResponseModel(true, trainSetting);
+            var trainSettingResponse = buildTrainSettingResponseModel(train, trainSetting);
+            return new ApiResponseModel(true, trainSettingResponse);
         }
 
         [HttpGet("local/dataset")]
@@ -149,6 +133,22 @@ namespace dotnet_ts_support.Controllers
             }
             //return resources.ToArray();
             return new ApiResponseModel(true, resources.ToArray());
+        }
+
+        [HttpGet("train/{id}")]
+        public ActionResult<ApiResponseModel> GetTrainInfo(string id)
+        {
+            var train = _trainSerivce.Get(id);
+            if (train == null) return NotFound();
+            var trainServerInfo = _trainServerInfoService.Get(train.serverIndex);
+            if (trainServerInfo == null) return NotFound();
+            var trainStatus = _trainSerivce.GetStatusFromServer(trainServerInfo.uri, train.serverTrainId).Result;
+            if (trainStatus == null) return NotFound();
+            var trainMetric = _trainSerivce.GetMetricFromServer(trainServerInfo.uri, train.serverTrainId).Result;
+            if (trainMetric == null) return NotFound();
+            var trainInfo = buildTrainInfoModel(train, trainStatus, trainMetric);
+            //return trainInfo;
+            return new ApiResponseModel(true, trainInfo);
         }
 
         [HttpDelete("train/{id}")]
@@ -318,6 +318,45 @@ namespace dotnet_ts_support.Controllers
                 max_iteration = trainMetric.max_iteration,
                 directoryId = train.directoryId,
                 trainSettingId = train.trainSettingId,
+            };
+        }
+
+        private TrainSettingResponseModel buildTrainSettingResponseModel(Train train, TrainSetting trainSetting)
+        {
+            return new TrainSettingResponseModel()
+            {
+                name = train.name,
+                serverIndex = train.serverIndex,
+
+                batchSize = trainSetting.batchSize,
+                pretrainData = trainSetting.pretrainData,
+                width = trainSetting.width,
+                height = trainSetting.height,
+                channels = trainSetting.channels,
+                baseLearningRate = trainSetting.baseLearningRate,
+                gamma = trainSetting.gamma,
+                stepCount = trainSetting.stepCount,
+                maxIteration = trainSetting.maxIteration,
+
+                mirror = trainSetting.mirror,
+                flip = trainSetting.flip,
+                rotation90 = trainSetting.rotation90,
+                zoom = trainSetting.zoom,
+                tilt = trainSetting.tilt,
+                shift = trainSetting.shift,
+                rotation = trainSetting.rotation,
+                contrast = trainSetting.contrast,
+                brightness = trainSetting.brightness,
+                smoothFiltering = trainSetting.smoothFiltering,
+                noise = trainSetting.noise,
+                colorNoise = trainSetting.colorNoise,
+                partialFocus = trainSetting.partialFocus,
+                shade = trainSetting.shade,
+                hue = trainSetting.hue,
+                saturation = trainSetting.saturation,
+                maxRandomAugmentCount = trainSetting.maxRandomAugmentCount,
+                probability = trainSetting.probability,
+                borderMode = trainSetting.borderMode
             };
         }
     }
