@@ -31,6 +31,8 @@ namespace dotnet_ts_support
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddCors();
+
             var key = Encoding.ASCII.GetBytes("aaaaaaaaaaaaaaaaaaaa");
 
             services.AddAuthentication(x =>
@@ -84,6 +86,11 @@ namespace dotnet_ts_support
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "dotnet_ts_support v1"));
             }
+
+            app.UseCors(builder => builder
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowAnyOrigin());
 
             app.UseRouting();
 
