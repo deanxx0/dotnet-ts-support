@@ -33,7 +33,7 @@ namespace dotnet_ts_support.Models
         public int batch_size { get; init; }
         public string pretrain_data { get; init; }
         public int width { get; init; }
-        public int heigth { get; init; }
+        public int height { get; init; }
         public int channels { get; init; }
 
         public Network() { }
@@ -70,25 +70,25 @@ namespace dotnet_ts_support.Models
 
     public class Augmentation
     {
-        public bool Mirror { get; init; }
-        public bool Flip { get; init; }
-        public bool Rotation90 { get; init; }
-        public double Zoom { get; init; }
-        public double Tilt { get; init; }
-        public double Shift { get; init; }
-        public double Rotation { get; init; }
-        public double Contrast { get; init; }
-        public double Brightness { get; init; }
-        public double SmoothFiltering { get; init; }
-        public double Noise { get; init; }
-        public double ColorNoise { get; init; }
-        public double PartialFocus { get; init; }
-        public double Shade { get; init; }
-        public double Hue { get; init; }
-        public double Saturation { get; init; }
-        public int MaxRandomAugmentCount { get; init; }
-        public double Probability { get; init; }
-        public int BorderMode { get; init; }
+        public bool mirror { get; init; }
+        public bool flip { get; init; }
+        public bool rotation90 { get; init; }
+        public double zoom { get; init; }
+        public double tilt { get; init; }
+        public double shift { get; init; }
+        public double rotation { get; init; }
+        public double contrast { get; init; }
+        public double brightness { get; init; }
+        public double smoothFiltering { get; init; }
+        public double noise { get; init; }
+        public double colorNoise { get; init; }
+        public double partialFocus { get; init; }
+        public double shade { get; init; }
+        public double hue { get; init; }
+        public double saturation { get; init; }
+        public int maxRandomAugmentCount { get; init; }
+        public double probability { get; init; }
+        public int borderMode { get; init; }
 
         public Augmentation() { }
     }

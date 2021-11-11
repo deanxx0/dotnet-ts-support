@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using dotnet_ts_support.Models;
 using MongoDB.Bson;
+using System;
+using System.Collections.Generic;
 
 namespace dotnet_ts_support.Controllers
 {
@@ -58,13 +60,40 @@ namespace dotnet_ts_support.Controllers
             return train;
         }
 
-        //[HttpGet("trainInfo/{id}"]
-        //public ActionResult<TrainInfoModel> GetTrainInfo(string id)
-        //{
-        //    var trainInfo = buildTrainInfoModel(Train train, string trainStatus, MetricModel metricModel);
-        //    return trainInfo;
-        //}
+        [HttpGet("totalcount")]
+        public ActionResult<long> GetTotalCount() => _trainSerivce.GetTotalCount().Result;
 
+        [HttpGet("pages/{pageNo}")]
+        public ActionResult<TrainInfoModel[]> GetTrainInfoPage(int pageNo, [FromQuery] int perPage = 5)
+        {
+            var trains = _trainSerivce.GetTrainPage(pageNo, perPage);
+            List<TrainInfoModel> trainInfos = new();
+            foreach(Train train in trains)
+            {
+                var trainServerInfo = _trainServerInfoService.Get(train.serverIndex);
+                var trainStatus = _trainSerivce.GetStatusFromServer(trainServerInfo.uri, train.serverTrainId).Result;
+                var trainMetric = _trainSerivce.GetMetricFromServer(trainServerInfo.uri, train.serverTrainId).Result;
+                var trainInfo = buildTrainInfoModel(train, trainStatus, trainMetric);
+                trainInfos.Add(trainInfo);
+            }
+            return trainInfos.ToArray();
+        }
+
+        [HttpGet("trainInfo/{id}")]
+        public ActionResult<TrainInfoModel> GetTrainInfo(string id)
+        {
+            var train = _trainSerivce.Get(id);
+            if (train == null) return NotFound();
+            var trainServerInfo = _trainServerInfoService.Get(train.serverIndex);
+            if (trainServerInfo == null) return NotFound();
+            var trainStatus = _trainSerivce.GetStatusFromServer(trainServerInfo.uri, train.serverTrainId).Result;
+            if (trainStatus == null) return NotFound();
+            var trainMetric = _trainSerivce.GetMetricFromServer(trainServerInfo.uri, train.serverTrainId).Result;
+            if (trainMetric == null) return NotFound();
+            var trainInfo = buildTrainInfoModel(train, trainStatus, trainMetric);
+            return trainInfo;
+        }
+        
         [HttpGet("directory/{trainId}")]
         public ActionResult<Directory> GetDirectory(string trainId)
         {
@@ -94,9 +123,16 @@ namespace dotnet_ts_support.Controllers
         [HttpDelete("train/{id}")]
         public IActionResult DeleteTrain(string id)
         {
-            // train status 검사 필요
             var train = _trainSerivce.Get(id);
             if (train == null) return NotFound();
+            var trainServerInfo = _trainServerInfoService.Get(train.serverIndex);
+            if (trainServerInfo == null) return NotFound();
+            var trainStatus = _trainSerivce.GetStatusFromServer(trainServerInfo.uri, train.serverTrainId).Result;
+            if (trainStatus != "done" && trainStatus != "error")
+            {
+                Console.WriteLine("Training is on processing : only 'done' or 'error' train status could be deleted");
+                return NoContent();
+            }
             _directoryService.Remove(train.directoryId);
             _trainSettingService.Remove(train.trainSettingId);
             _trainSerivce.Remove(id);
@@ -177,7 +213,7 @@ namespace dotnet_ts_support.Controllers
                         batch_size = startTrainModel.batchSize,
                         pretrain_data = startTrainModel.pretrainData,
                         width = startTrainModel.width,
-                        heigth = startTrainModel.height,
+                        height = startTrainModel.height,
                         channels = startTrainModel.channels
                     },
                     patchmode = new Patchmode()
@@ -202,25 +238,25 @@ namespace dotnet_ts_support.Controllers
                     },
                     augmentation = new Augmentation()
                     {
-                        Mirror = startTrainModel.mirror,
-                        Flip = startTrainModel.flip,
-                        Rotation90 = startTrainModel.rotation90,
-                        Zoom = startTrainModel.zoom,
-                        Tilt = startTrainModel.tilt,
-                        Shift = startTrainModel.shift,
-                        Rotation = startTrainModel.rotation,
-                        Contrast = startTrainModel.contrast,
-                        Brightness = startTrainModel.brightness,
-                        SmoothFiltering = startTrainModel.smoothFiltering,
-                        Noise = startTrainModel.noise,
-                        ColorNoise = startTrainModel.colorNoise,
-                        PartialFocus = startTrainModel.partialFocus,
-                        Shade = startTrainModel.shade,
-                        Hue = startTrainModel.hue,
-                        Saturation = startTrainModel.saturation,
-                        MaxRandomAugmentCount = startTrainModel.maxRandomAugmentCount,
-                        Probability = startTrainModel.probability,
-                        BorderMode = startTrainModel.borderMode,
+                        mirror = startTrainModel.mirror,
+                        flip = startTrainModel.flip,
+                        rotation90 = startTrainModel.rotation90,
+                        zoom = startTrainModel.zoom,
+                        tilt = startTrainModel.tilt,
+                        shift = startTrainModel.shift,
+                        rotation = startTrainModel.rotation,
+                        contrast = startTrainModel.contrast,
+                        brightness = startTrainModel.brightness,
+                        smoothFiltering = startTrainModel.smoothFiltering,
+                        noise = startTrainModel.noise,
+                        colorNoise = startTrainModel.colorNoise,
+                        partialFocus = startTrainModel.partialFocus,
+                        shade = startTrainModel.shade,
+                        hue = startTrainModel.hue,
+                        saturation = startTrainModel.saturation,
+                        maxRandomAugmentCount = startTrainModel.maxRandomAugmentCount,
+                        probability = startTrainModel.probability,
+                        borderMode = startTrainModel.borderMode,
                     }
                 },
                 class_list = new System.Collections.Generic.Dictionary<string, string>()
@@ -232,12 +268,26 @@ namespace dotnet_ts_support.Controllers
             };
         }
 
-        //private TrainInfoModel buildTrainInfoModel(Train train, string trainStatus, MetricModel metricModel)
-        //{
-        //    return new TrainInfoModel()
-        //    {
-
-        //    }
-        //}
+        private TrainInfoModel buildTrainInfoModel(Train train, string trainStatus, TrainMetricModel trainMetric)
+        {
+            return new TrainInfoModel()
+            {
+                id = train.id,
+                serverIndex = train.serverIndex,
+                serverTrainId = train.serverTrainId,
+                name = train.name,
+                status = trainStatus,
+                progress = trainMetric.current_iteration == 0 ? 0 : (trainMetric.current_iteration / trainMetric.max_iteration),
+                createdAt = "test createdAt",
+                train_loss = trainMetric.train_loss,
+                test_loss = trainMetric.test_loss,
+                test_accuracy = trainMetric.test_accuracy,
+                iou = trainMetric.test_accuracy2,
+                iteration = trainMetric.current_iteration,
+                max_iteration = trainMetric.max_iteration,
+                directoryId = train.directoryId,
+                trainSettingId = train.trainSettingId,
+            };
+        }
     }
 }

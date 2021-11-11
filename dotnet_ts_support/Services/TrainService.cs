@@ -1,4 +1,5 @@
 ﻿using dotnet_ts_support.Models;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
@@ -34,6 +35,22 @@ namespace dotnet_ts_support.Services
 
         public Train Get(string id) => _trains.Find(train => train.id == id).FirstOrDefault();
 
+        public Task<long> GetTotalCount() => _trains.CountDocumentsAsync(new BsonDocument());
+
+        public Train[] GetTrainPage(int pageNo, int perPage)
+        {
+            var trains = _trains.Find(train => true).SortByDescending(train => train.id).Limit(perPage).Skip(perPage * (pageNo - 1)).ToList();
+            return trains.ToArray();
+            //var train = _trains.Find(train => true).FirstOrDefaultAsync().Result;
+            //var objId = new ObjectId(train.id);
+            //var time = objId.CreationTime;
+            //Console.WriteLine(time);
+            //foreach(Train train in trains)
+            //{
+            //    Console.WriteLine($"{train.id} / {train.name}");
+            //}
+        }
+
         public void Update(string id, Train trainIn) => _trains.ReplaceOne(train => train.id == id, trainIn);
 
         public void Remove(string id) => _trains.DeleteOne(train => train.id == id);
@@ -42,7 +59,7 @@ namespace dotnet_ts_support.Services
         {
             try
             {
-                using(var response = await _httpClient.PostAsJsonAsync($"http://{trainServerUri}/trains", trainRequestModel))
+                using (var response = await _httpClient.PostAsJsonAsync($"http://{trainServerUri}/trains", trainRequestModel))
                 {
                     if (HttpStatusCode.OK == response.StatusCode)
                     {
@@ -63,44 +80,80 @@ namespace dotnet_ts_support.Services
                 return null;
             }
             return null;
-            //using (var response = await _httpClient.PostAsJsonAsync($"http://{trainServerUri}/trains", trainRequestModel))
-            //{
-            //    if (HttpStatusCode.OK == response.StatusCode)
-            //    {
-            //        string body = await response.Content.ReadAsStringAsync();
-
-            //        var doc = JsonDocument.Parse(body);
-            //        var root = doc.RootElement;
-            //        var successs = root.GetProperty("success").GetBoolean();
-            //        if (successs)
-            //        {
-            //            var result = root.GetProperty("result");
-            //            var resultDoc = JsonDocument.Parse(result.GetRawText()).RootElement;
-            //            var trainResponseModel = JsonSerializer.Deserialize<TrainResponseModel>(resultDoc);
-
-            //            //train model = new train()
-            //            //{
-            //            //    Id = result.GetProperty("id").GetString(),
-            //            //    status = result.GetProperty("status").GetString(),
-            //            //    error_message = result.GetProperty("error_message").GetString(),
-            //            //    created_time = result.GetProperty("created_time").GetDateTime(),
-            //            //    remain_time_ms = (double)result.GetProperty("remain_time_ms").GetDecimal(),
-            //            //    process_time_ms = (double)result.GetProperty("process_time_ms").GetDecimal(),
-            //            //};
-            //        }
-            //    }
-            //}
         }
 
-        //public async Task<> GetTrainStatusFromServer()
-        //{
+        public async Task<string> GetStatusFromServer(string trainServerUri, string serverTrainId)
+        {
+            try
+            {
+                using (var response = await _httpClient.GetAsync($"http://{trainServerUri}/trains/{serverTrainId}"))
+                {
+                    if (HttpStatusCode.OK == response.StatusCode)
+                    {
+                        var body = await response.Content.ReadAsStringAsync();
+                        var jsonDoc = JsonDocument.Parse(body).RootElement;
+                        var resultBody = jsonDoc.GetProperty("result").GetRawText();
+                        var resultJsonDoc = JsonDocument.Parse(resultBody).RootElement;
+                        TrainResponseModel trainResponse = JsonSerializer.Deserialize<TrainResponseModel>(resultJsonDoc.GetRawText());
+                        return trainResponse.status;
+                    }
+                }
+            }
+            catch (HttpRequestException e)
+            {
+                return null;
+            }
+            return null;
+        }
 
-        //}
-
-        //public async Task<> GetTrainMetricFromServer()
-        //{
-
-        //}
+        public async Task<TrainMetricModel> GetMetricFromServer(string trainServerUri, string serverTrainId)
+        {
+            try
+            {
+                using (var response = await _httpClient.GetAsync($"http://{trainServerUri}/trains/{serverTrainId}/metrics/pages/0"))
+                {
+                    if (HttpStatusCode.OK == response.StatusCode)
+                    {
+                        var body = await response.Content.ReadAsStringAsync();
+                        var jsonDoc = JsonDocument.Parse(body).RootElement;
+                        var resultBody = jsonDoc.GetProperty("result").GetRawText();
+                        var resultJsonDoc = JsonDocument.Parse(resultBody).RootElement;
+                        TrainMetricModel[] metricResponse = JsonSerializer.Deserialize<TrainMetricModel[]>(resultJsonDoc.GetRawText());
+                        if(metricResponse.Length == 0)
+                        {
+                            return new TrainMetricModel()
+                            {
+                                train_id = serverTrainId,
+                                max_iteration = 0,
+                                current_iteration = 0,
+                                train_loss = 0,
+                                test_accuracy = 0,
+                                test_loss = 0,
+                                test_accuracy2 = 0
+                            };
+                        }
+                        else
+                        {
+                            return new TrainMetricModel()
+                            {
+                                train_id = metricResponse[metricResponse.Length-1].train_id,
+                                max_iteration = metricResponse[metricResponse.Length - 1].max_iteration,
+                                current_iteration = metricResponse[metricResponse.Length - 1].current_iteration,
+                                train_loss = metricResponse[metricResponse.Length - 1].train_loss,
+                                test_accuracy = metricResponse[metricResponse.Length - 1].test_accuracy,
+                                test_loss = metricResponse[metricResponse.Length - 1].test_loss,
+                                test_accuracy2 = metricResponse[metricResponse.Length - 1].test_accuracy2
+                            };
+                        }
+                    }
+                }
+            }
+            catch (HttpRequestException e)
+            {
+                return null;
+            }
+            return null;
+        }
 
         //public async Task<> GetResourceFromServer()
         //{
