@@ -79,7 +79,7 @@ namespace dotnet_ts_support.Controllers
             return trainInfos.ToArray();
         }
 
-        [HttpGet("trainInfo/{id}")]
+        [HttpGet("{id}")]
         public ActionResult<TrainInfoModel> GetTrainInfo(string id)
         {
             var train = _trainSerivce.Get(id);
@@ -104,7 +104,7 @@ namespace dotnet_ts_support.Controllers
             return directory;
         }
 
-        [HttpGet("trainSetting/{trainId}")]
+        [HttpGet("setting/{trainId}")]
         public ActionResult<TrainSetting> GetTrainSetting(string trainId)
         {
             var train = _trainSerivce.Get(trainId);
@@ -120,7 +120,21 @@ namespace dotnet_ts_support.Controllers
         [HttpGet("pretrain")]
         public ActionResult<string[]> GetPretrain() => _directoryService.GetPretrains();
 
-        [HttpDelete("train/{id}")]
+        [HttpGet("train-server/resource")]
+        public ActionResult<ResourceModel[]> GetResources()
+        {
+            var serverIndex = new int[] { 0, 1, 2, 3 };
+            List<ResourceModel> resources = new();
+            foreach (int i in serverIndex)
+            {
+                var serverUri = _trainServerInfoService.Get(i);
+                var resource = _trainSerivce.GetResources(serverUri.uri).Result;
+                resources.Add(resource);
+            }
+            return resources.ToArray();
+        }
+
+        [HttpDelete("{id}")]
         public IActionResult DeleteTrain(string id)
         {
             var train = _trainSerivce.Get(id);

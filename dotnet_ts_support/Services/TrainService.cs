@@ -51,6 +51,30 @@ namespace dotnet_ts_support.Services
             //}
         }
 
+        public async Task<ResourceModel> GetResources(string uri)
+        {
+            try
+            {
+                using (var response = await _httpClient.GetAsync($"http://{uri}/resources"))
+                {
+                    if (HttpStatusCode.OK == response.StatusCode)
+                    {
+                        var body = await response.Content.ReadAsStringAsync();
+                        var jsonDoc = JsonDocument.Parse(body).RootElement;
+                        var resultBody = jsonDoc.GetProperty("result").GetRawText();
+                        var resultJsonDoc = JsonDocument.Parse(resultBody).RootElement;
+                        ResourceModel resourceResponse = JsonSerializer.Deserialize<ResourceModel>(resultJsonDoc.GetRawText());
+                        return resourceResponse;
+                    }
+                }
+            }
+            catch (HttpRequestException e)
+            {
+                return null;
+            }
+            return null;
+        }
+
         public void Update(string id, Train trainIn) => _trains.ReplaceOne(train => train.id == id, trainIn);
 
         public void Remove(string id) => _trains.DeleteOne(train => train.id == id);
@@ -76,7 +100,6 @@ namespace dotnet_ts_support.Services
             }
             catch(HttpRequestException e)
             {
-                Console.WriteLine($"error! {e.Message}");
                 return null;
             }
             return null;
