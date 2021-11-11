@@ -12,8 +12,8 @@ namespace dotnet_ts_support.Models
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
         public string id { get; set; }
-        public string name { get; init; }
-        public string pw { get; init; }
+        public string username { get; init; }
+        public string password { get; init; }
 
         public User() { }
     }

@@ -60,10 +60,10 @@ namespace dotnet_ts_support.Controllers
             return train;
         }
 
-        [HttpGet("totalcount")]
+        [HttpGet("train/totalcount")]
         public ActionResult<long> GetTotalCount() => _trainSerivce.GetTotalCount().Result;
 
-        [HttpGet("pages/{pageNo}")]
+        [HttpGet("train/pages/{pageNo}")]
         public ActionResult<TrainInfoModel[]> GetTrainInfoPage(int pageNo, [FromQuery] int perPage = 5)
         {
             var trains = _trainSerivce.GetTrainPage(pageNo, perPage);
@@ -79,7 +79,7 @@ namespace dotnet_ts_support.Controllers
             return trainInfos.ToArray();
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("train/{id}")]
         public ActionResult<TrainInfoModel> GetTrainInfo(string id)
         {
             var train = _trainSerivce.Get(id);
@@ -104,7 +104,7 @@ namespace dotnet_ts_support.Controllers
             return directory;
         }
 
-        [HttpGet("setting/{trainId}")]
+        [HttpGet("train/setting/{trainId}")]
         public ActionResult<TrainSetting> GetTrainSetting(string trainId)
         {
             var train = _trainSerivce.Get(trainId);
@@ -114,10 +114,10 @@ namespace dotnet_ts_support.Controllers
             return trainSetting;
         }
 
-        [HttpGet("dataset")]
+        [HttpGet("local/dataset")]
         public ActionResult<string[]> GetDataset() => _directoryService.GetDatasets();
 
-        [HttpGet("pretrain")]
+        [HttpGet("local/pretrain")]
         public ActionResult<string[]> GetPretrain() => _directoryService.GetPretrains();
 
         [HttpGet("train-server/resource")]
@@ -134,7 +134,7 @@ namespace dotnet_ts_support.Controllers
             return resources.ToArray();
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("train/{id}")]
         public IActionResult DeleteTrain(string id)
         {
             var train = _trainSerivce.Get(id);

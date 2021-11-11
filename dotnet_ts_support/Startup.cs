@@ -91,6 +91,8 @@ namespace dotnet_ts_support
                 .AllowAnyHeader()
                 .AllowAnyMethod()
                 .AllowAnyOrigin());
+                //.AllowCredentials()
+                //.WithExposedHeaders("access_token"));
 
             app.UseRouting();
 

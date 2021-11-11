@@ -26,12 +26,12 @@ namespace dotnet_ts_support.Controllers
         }
 
         [AllowAnonymous]
-        [HttpPost("getToken")]
-        public async Task<ActionResult> GetToken([FromBody] User userIn)
+        [HttpPost("login")]
+        public async Task<ActionResult<ApiResponseModel>> GetToken([FromBody] User userIn)
         {
-            var user = _userService.GetByName(userIn.name);
+            var user = _userService.GetByName(userIn.username);
             if (user == null) return NotFound();
-            if (userIn.pw == user.pw)
+            if (userIn.password == user.password)
             {
                 var tokenHandler = new JwtSecurityTokenHandler();
                 var key = Encoding.ASCII.GetBytes("aaaaaaaaaaaaaaaaaaaa");
@@ -39,14 +39,16 @@ namespace dotnet_ts_support.Controllers
                 {
                     Subject = new ClaimsIdentity(new Claim[]
                     {
-                        new Claim(ClaimTypes.Name, user.name)
+                        new Claim(ClaimTypes.Name, user.username)
                     }),
                     Expires = DateTime.UtcNow.AddDays(1),
                     SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
                 };
                 var token = tokenHandler.CreateToken(tokenDescriptor);
                 var tokenString = tokenHandler.WriteToken(token);
-                return Ok(new { Token = tokenString });
+                //return Ok(new { access_token = tokenString });
+                HttpContext.Response.Headers.Add("access_token", tokenString);
+                return new ApiResponseModel(true, new { access_token = tokenString });
             }
             else
             {

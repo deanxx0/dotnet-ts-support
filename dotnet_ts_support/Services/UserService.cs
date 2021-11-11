@@ -22,7 +22,7 @@ namespace dotnet_ts_support.Services
 
         public User Get(string id) => _users.Find(user => user.id == id).FirstOrDefault();
 
-        public User GetByName(string name) => _users.Find(user => user.name == name).FirstOrDefault();
+        public User GetByName(string name) => _users.Find(user => user.username == name).FirstOrDefault();
 
         public User Create(User userIn)
         {
