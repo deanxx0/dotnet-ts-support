@@ -40,7 +40,7 @@ namespace dotnet_ts_support.Controllers
         }
 
         [HttpPost("train")]
-        public ActionResult<Train> StartTrain([FromBody] StartTrainModel startTrainModel)
+        public ActionResult<ApiResponseModel> StartTrain([FromBody] StartTrainModel startTrainModel)
         {
             var directory = buildDirectory(startTrainModel);
             _directoryService.Create(directory);
@@ -50,21 +50,25 @@ namespace dotnet_ts_support.Controllers
             var trainRequestModel = buildTrainRequestModel(startTrainModel);
             var responseTrain = _trainSerivce.PostTrainToServer(trainServerInfo.uri, trainRequestModel).Result;
             var train = buildTrain(
-                startTrainModel.serverIndex, 
+                startTrainModel.serverIndex,
                 startTrainModel.name,
-                responseTrain.id, 
-                directory.id, 
+                responseTrain.id,
+                directory.id,
                 trainSetting.id
                 );
             _trainSerivce.Create(train);
-            return train;
+            return new ApiResponseModel(true, train);
         }
 
         [HttpGet("train/totalcount")]
-        public ActionResult<long> GetTotalCount() => _trainSerivce.GetTotalCount().Result;
+        public ActionResult<ApiResponseModel> GetTotalCount()
+        {
+            var totalCount = _trainSerivce.GetTotalCount().Result;
+            return new ApiResponseModel(true, totalCount);
+        }
 
         [HttpGet("train/pages/{pageNo}")]
-        public ActionResult<TrainInfoModel[]> GetTrainInfoPage(int pageNo, [FromQuery] int perPage = 5)
+        public ActionResult<ApiResponseModel> GetTrainInfoPage(int pageNo, [FromQuery] int perPage = 5)
         {
             var trains = _trainSerivce.GetTrainPage(pageNo, perPage);
             List<TrainInfoModel> trainInfos = new();
@@ -76,11 +80,12 @@ namespace dotnet_ts_support.Controllers
                 var trainInfo = buildTrainInfoModel(train, trainStatus, trainMetric);
                 trainInfos.Add(trainInfo);
             }
-            return trainInfos.ToArray();
+            //return trainInfos.ToArray();
+            return new ApiResponseModel(true, trainInfos.ToArray());
         }
 
         [HttpGet("train/{id}")]
-        public ActionResult<TrainInfoModel> GetTrainInfo(string id)
+        public ActionResult<ApiResponseModel> GetTrainInfo(string id)
         {
             var train = _trainSerivce.Get(id);
             if (train == null) return NotFound();
@@ -91,37 +96,48 @@ namespace dotnet_ts_support.Controllers
             var trainMetric = _trainSerivce.GetMetricFromServer(trainServerInfo.uri, train.serverTrainId).Result;
             if (trainMetric == null) return NotFound();
             var trainInfo = buildTrainInfoModel(train, trainStatus, trainMetric);
-            return trainInfo;
+            //return trainInfo;
+            return new ApiResponseModel(true, trainInfo);
         }
         
         [HttpGet("directory/{trainId}")]
-        public ActionResult<Directory> GetDirectory(string trainId)
+        public ActionResult<ApiResponseModel> GetDirectory(string trainId)
         {
             var train = _trainSerivce.Get(trainId);
             if (train == null) return NotFound();
             var directory = _directoryService.Get(train.directoryId);
             if (directory == null) return NotFound();
-            return directory;
+            //return directory;
+            return new ApiResponseModel(true, directory);
         }
 
         [HttpGet("train/setting/{trainId}")]
-        public ActionResult<TrainSetting> GetTrainSetting(string trainId)
+        public ActionResult<ApiResponseModel> GetTrainSetting(string trainId)
         {
             var train = _trainSerivce.Get(trainId);
             if (train == null) return NotFound();
             var trainSetting = _trainSettingService.Get(train.trainSettingId);
             if (trainSetting == null) return NotFound();
-            return trainSetting;
+            //return trainSetting;
+            return new ApiResponseModel(true, trainSetting);
         }
 
         [HttpGet("local/dataset")]
-        public ActionResult<string[]> GetDataset() => _directoryService.GetDatasets();
+        public ActionResult<ApiResponseModel> GetDataset()
+        {
+            var datasets = _directoryService.GetDatasets();
+            return new ApiResponseModel(true, datasets);
+        }
 
         [HttpGet("local/pretrain")]
-        public ActionResult<string[]> GetPretrain() => _directoryService.GetPretrains();
+        public ActionResult<ApiResponseModel> GetPretrain()
+        {
+            var pretrains = _directoryService.GetPretrains();
+            return new ApiResponseModel(true, pretrains);
+        }
 
         [HttpGet("train-server/resource")]
-        public ActionResult<ResourceModel[]> GetResources()
+        public ActionResult<ApiResponseModel> GetResources()
         {
             var serverIndex = new int[] { 0, 1, 2, 3 };
             List<ResourceModel> resources = new();
@@ -131,7 +147,8 @@ namespace dotnet_ts_support.Controllers
                 var resource = _trainSerivce.GetResources(serverUri.uri).Result;
                 resources.Add(resource);
             }
-            return resources.ToArray();
+            //return resources.ToArray();
+            return new ApiResponseModel(true, resources.ToArray());
         }
 
         [HttpDelete("train/{id}")]

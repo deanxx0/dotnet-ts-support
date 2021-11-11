@@ -87,14 +87,15 @@ namespace dotnet_ts_support
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "dotnet_ts_support v1"));
             }
 
+            app.UseRouting();
+
             app.UseCors(builder => builder
                 .AllowAnyHeader()
                 .AllowAnyMethod()
-                .AllowAnyOrigin());
-                //.AllowCredentials()
-                //.WithExposedHeaders("access_token"));
-
-            app.UseRouting();
+                .SetIsOriginAllowed(origin => true)
+                .AllowCredentials()
+                .WithExposedHeaders("access_token")
+                );
 
             app.UseAuthentication();
 
