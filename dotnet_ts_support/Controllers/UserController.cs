@@ -30,7 +30,7 @@ namespace dotnet_ts_support.Controllers
         public async Task<ActionResult> GetToken([FromBody] User userIn)
         {
             var user = _userService.GetByName(userIn.name);
-            if (user == null) NotFound();
+            if (user == null) return NotFound();
             if (userIn.pw == user.pw)
             {
                 var tokenHandler = new JwtSecurityTokenHandler();
@@ -61,7 +61,7 @@ namespace dotnet_ts_support.Controllers
         public ActionResult<User> Get(string id)
         {
             var user = _userService.Get(id);
-            if (user == null) NotFound();
+            if (user == null) return NotFound();
             return user;
         }
 
@@ -77,7 +77,7 @@ namespace dotnet_ts_support.Controllers
         public IActionResult Update(string id, User userIn)
         {
             var user = _userService.Get(id);
-            if (user == null) NotFound();
+            if (user == null) return NotFound();
             userIn.id = id;
             _userService.Update(id, userIn);
             return NoContent();
@@ -87,7 +87,7 @@ namespace dotnet_ts_support.Controllers
         public IActionResult Delete(string id)
         {
             var user = _userService.Get(id);
-            if (user == null) NotFound();
+            if (user == null) return NotFound();
             _userService.Remove(id);
             return NoContent();
         }

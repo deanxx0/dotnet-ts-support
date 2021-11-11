@@ -69,9 +69,9 @@ namespace dotnet_ts_support.Controllers
         public ActionResult<Directory> GetDirectory(string trainId)
         {
             var train = _trainSerivce.Get(trainId);
-            if (train == null) NotFound();
+            if (train == null) return NotFound();
             var directory = _directoryService.Get(train.directoryId);
-            if (directory == null) NotFound();
+            if (directory == null) return NotFound();
             return directory;
         }
 
@@ -79,9 +79,9 @@ namespace dotnet_ts_support.Controllers
         public ActionResult<TrainSetting> GetTrainSetting(string trainId)
         {
             var train = _trainSerivce.Get(trainId);
-            if (train == null) NotFound();
+            if (train == null) return NotFound();
             var trainSetting = _trainSettingService.Get(train.trainSettingId);
-            if (trainSetting == null) NotFound();
+            if (trainSetting == null) return NotFound();
             return trainSetting;
         }
 
@@ -96,7 +96,7 @@ namespace dotnet_ts_support.Controllers
         {
             // train status 검사 필요
             var train = _trainSerivce.Get(id);
-            if (train == null) NotFound();
+            if (train == null) return NotFound();
             _directoryService.Remove(train.directoryId);
             _trainSettingService.Remove(train.trainSettingId);
             _trainSerivce.Remove(id);
