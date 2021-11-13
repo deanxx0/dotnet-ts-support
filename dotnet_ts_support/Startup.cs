@@ -129,6 +129,10 @@ namespace dotnet_ts_support
                 .WithExposedHeaders(CorsHelper.GetExposedHeaders())
                 );
 
+            app.UseAuthentication();
+
+            app.UseAuthorization();
+
             app.UseTus(httpContext => new DefaultTusConfiguration
             {
                 Store = new TusDiskStore(_tusDir),
@@ -176,10 +180,6 @@ namespace dotnet_ts_support
                     }
                 }
             });
-
-            app.UseAuthentication();
-
-            app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
