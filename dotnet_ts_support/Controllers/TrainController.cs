@@ -309,7 +309,7 @@ namespace dotnet_ts_support.Controllers
                 name = train.name,
                 status = trainStatus,
                 progress = trainMetric.current_iteration == 0 ? 0 : (trainMetric.current_iteration / trainMetric.max_iteration),
-                createdAt = "test createdAt",
+                createdAt = new ObjectId(train.id).CreationTime.ToString(),
                 train_loss = trainMetric.train_loss,
                 test_loss = trainMetric.test_loss,
                 test_accuracy = trainMetric.test_accuracy,

@@ -12,4 +12,6 @@
     <PackageReference Include="tusdotnet" Version="2.4.0" />
   </ItemGroup>
 
+  <ProjectExtensions><VisualStudio><UserProperties appsettings_1json__JsonSchema="" /></VisualStudio></ProjectExtensions>
+
 </Project>
