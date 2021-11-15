@@ -123,15 +123,14 @@ namespace dotnet_ts_support.Controllers
         [HttpGet("train-server/resource")]
         public ActionResult<ApiResponseModel> GetResources()
         {
-            var serverIndex = new int[] { 0, 1, 2, 3 };
+            var trainServers = _trainServerInfoService.Get();
             List<ResourceModel> resources = new();
-            foreach (int i in serverIndex)
+            foreach (var trainServer in trainServers)
             {
-                var serverUri = _trainServerInfoService.Get(i);
+                var serverUri = _trainServerInfoService.Get(trainServer.serverIndex);
                 var resource = _trainSerivce.GetResources(serverUri.uri).Result;
                 resources.Add(resource);
             }
-            //return resources.ToArray();
             return new ApiResponseModel(true, resources.ToArray());
         }
 
