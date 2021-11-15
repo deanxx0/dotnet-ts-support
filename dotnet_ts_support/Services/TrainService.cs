@@ -1,7 +1,6 @@
 ﻿using dotnet_ts_support.Models;
 using MongoDB.Bson;
 using MongoDB.Driver;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -177,10 +176,5 @@ namespace dotnet_ts_support.Services
             }
             return null;
         }
-
-        //public async Task<> GetResourceFromServer()
-        //{
-
-        //}
     }
 }
