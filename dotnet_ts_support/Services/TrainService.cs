@@ -176,5 +176,49 @@ namespace dotnet_ts_support.Services
             }
             return null;
         }
+
+        public async Task<TrainMetricModel[]> GetMetricPageFromServer(string trainServerUri, string serverTrainId, int pageNo)
+        {
+            try
+            {
+                using (var response = await _httpClient.GetAsync($"http://{trainServerUri}/trains/{serverTrainId}/metrics/pages/{pageNo}"))
+                {
+                    if (HttpStatusCode.OK == response.StatusCode)
+                    {
+                        var body = await response.Content.ReadAsStringAsync();
+                        var jsonDoc = JsonDocument.Parse(body).RootElement;
+                        var resultBody = jsonDoc.GetProperty("result").GetRawText();
+                        var resultJsonDoc = JsonDocument.Parse(resultBody).RootElement;
+                        TrainMetricModel[] metricResponse = JsonSerializer.Deserialize<TrainMetricModel[]>(resultJsonDoc.GetRawText());
+                        //List<TrainMetricModel> metrics = metricResponse.ToList();
+                        if (metricResponse.Length == 0)
+                        {
+                            //metrics.Add(new TrainMetricModel()
+                            //    {
+                            //        train_id = serverTrainId,
+                            //        max_iteration = 0,
+                            //        current_iteration = 0,
+                            //        train_loss = 0,
+                            //        test_accuracy = 0,
+                            //        test_loss = 0,
+                            //        test_accuracy2 = 0
+                            //    }
+                            //);
+                            return null;
+                        }
+                        else
+                        {
+                            return metricResponse;
+                            //return metrics;
+                        }
+                    }
+                }
+            }
+            catch (HttpRequestException e)
+            {
+                return null;
+            }
+            return null;
+        }
     }
 }

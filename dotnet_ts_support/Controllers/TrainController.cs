@@ -83,6 +83,18 @@ namespace dotnet_ts_support.Controllers
             //return trainInfos.ToArray();
             return new ApiResponseModel(true, trainInfos.ToArray());
         }
+
+        [HttpGet("trains/{trainId}/metrics/pages/{pageNo}")]
+        public ActionResult<ApiResponseModel> GetMetricPage(string trainId, int pageNo)
+        {
+            var train = _trainSerivce.Get(trainId);
+            if (train == null) return NotFound();
+            var trainServerInfo = _trainServerInfoService.Get(train.serverIndex);
+            if (trainServerInfo == null) return NotFound();
+            var metrics = _trainSerivce.GetMetricPageFromServer(trainServerInfo.uri, train.serverTrainId, pageNo).Result;
+            return new ApiResponseModel(true, metrics);
+
+        }
         
         [HttpGet("directory/{trainId}")]
         public ActionResult<ApiResponseModel> GetDirectory(string trainId)
