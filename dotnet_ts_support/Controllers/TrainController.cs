@@ -312,24 +312,46 @@ namespace dotnet_ts_support.Controllers
 
         private TrainInfoModel buildTrainInfoModel(Train train, string trainStatus, TrainMetricModel trainMetric)
         {
-            return new TrainInfoModel()
+            double progress = 0;
+            if (trainMetric.current_iteration != 0)
             {
-                id = train.id,
-                serverIndex = train.serverIndex,
-                serverTrainId = train.serverTrainId,
-                name = train.name,
-                status = trainStatus,
-                progress = trainMetric.current_iteration == 0 ? 0 : (trainMetric.current_iteration / trainMetric.max_iteration),
-                createdAt = new ObjectId(train.id).CreationTime.ToString(),
-                train_loss = trainMetric.train_loss,
-                test_loss = trainMetric.test_loss,
-                test_accuracy = trainMetric.test_accuracy,
-                iou = trainMetric.test_accuracy2,
-                iteration = trainMetric.current_iteration,
-                max_iteration = trainMetric.max_iteration,
-                directoryId = train.directoryId,
-                trainSettingId = train.trainSettingId,
-            };
+                progress = trainMetric.current_iteration / (double)trainMetric.max_iteration;
+            }
+            return new TrainInfoModel(
+                train.id,
+                train.serverIndex,
+                train.serverTrainId,
+                train.name,
+                trainStatus,
+                progress,
+                new ObjectId(train.id).CreationTime.ToString(),
+                trainMetric.train_loss,
+                trainMetric.test_loss,
+                trainMetric.test_accuracy,
+                trainMetric.test_accuracy2,
+                trainMetric.current_iteration,
+                trainMetric.max_iteration,
+                train.directoryId,
+                train.trainSettingId
+                );
+            //return new TrainInfoModel()
+            //{
+            //    id = train.id,
+            //    serverIndex = train.serverIndex,
+            //    serverTrainId = train.serverTrainId,
+            //    name = train.name,
+            //    status = trainStatus,
+            //    progress = trainMetric.current_iteration == 0 ? 0 : (trainMetric.current_iteration / trainMetric.max_iteration),
+            //    createdAt = new ObjectId(train.id).CreationTime.ToString(),
+            //    train_loss = trainMetric.train_loss,
+            //    test_loss = trainMetric.test_loss,
+            //    test_accuracy = trainMetric.test_accuracy,
+            //    iou = trainMetric.test_accuracy2,
+            //    iteration = trainMetric.current_iteration,
+            //    max_iteration = trainMetric.max_iteration,
+            //    directoryId = train.directoryId,
+            //    trainSettingId = train.trainSettingId,
+            //};
         }
 
         private TrainSettingResponseModel buildTrainSettingResponseModel(Train train, TrainSetting trainSetting)

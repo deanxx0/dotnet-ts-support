@@ -204,7 +204,7 @@ namespace dotnet_ts_support.Services
                             //        test_accuracy2 = 0
                             //    }
                             //);
-                            return null;
+                            return (new List<TrainMetricModel>()).ToArray();
                         }
                         else
                         {
