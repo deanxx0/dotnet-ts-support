@@ -317,6 +317,9 @@ namespace dotnet_ts_support.Controllers
             {
                 progress = trainMetric.current_iteration / (double)trainMetric.max_iteration;
             }
+
+            var creationTime = (new ObjectId(train.id).CreationTime + TimeSpan.FromHours(9)).ToString();
+
             return new TrainInfoModel(
                 train.id,
                 train.serverIndex,
@@ -324,7 +327,7 @@ namespace dotnet_ts_support.Controllers
                 train.name,
                 trainStatus,
                 progress,
-                new ObjectId(train.id).CreationTime.ToString(),
+                creationTime,
                 trainMetric.train_loss,
                 trainMetric.test_loss,
                 trainMetric.test_accuracy,
